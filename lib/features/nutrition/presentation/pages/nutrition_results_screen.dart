@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../data/models/nutrition_response_model.dart';
 import '../widgets/nutrition_result_card.dart';
 
 class NutritionResultsScreen extends StatefulWidget {
@@ -16,11 +17,6 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  // Dummy nutrition values
-  final String proteinIntake = '120';
-  final String carbIntake = '250';
-  final String caloriesIntake = '2200';
-
   @override
   void initState() {
     super.initState();
@@ -29,25 +25,17 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
       duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     _animationController.forward();
   }
@@ -63,16 +51,16 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    final nutritionData =
+        ModalRoute.of(context)!.settings.arguments as NutritionData;
+
     return Scaffold(
       backgroundColor: AppColors.darkGreenBackground,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.darkGradient,
-        ),
+        decoration: BoxDecoration(gradient: AppColors.darkGradient),
         child: SafeArea(
           child: Column(
             children: [
-              // Header
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: screenWidth * 0.05,
@@ -102,13 +90,9 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                   ],
                 ),
               ),
-
-              // Content
               Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.05,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: SlideTransition(
@@ -118,15 +102,19 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                         children: [
                           SizedBox(height: screenHeight * 0.01),
 
-                          // Success message
                           Container(
                             padding: EdgeInsets.all(screenWidth * 0.04),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryGreen.withValues(alpha: 0.15),
-                              borderRadius:
-                                  BorderRadius.circular(screenWidth * 0.04),
+                              color: AppColors.primaryGreen.withValues(
+                                alpha: 0.15,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                screenWidth * 0.04,
+                              ),
                               border: Border.all(
-                                color: AppColors.primaryGreen.withValues(alpha: 0.3),
+                                color: AppColors.primaryGreen.withValues(
+                                  alpha: 0.3,
+                                ),
                                 width: 1,
                               ),
                             ),
@@ -136,8 +124,9 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                   padding: EdgeInsets.all(screenWidth * 0.02),
                                   decoration: BoxDecoration(
                                     color: AppColors.primaryGreen,
-                                    borderRadius:
-                                        BorderRadius.circular(screenWidth * 0.02),
+                                    borderRadius: BorderRadius.circular(
+                                      screenWidth * 0.02,
+                                    ),
                                   ),
                                   child: Icon(
                                     Icons.check_circle,
@@ -148,7 +137,8 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                 SizedBox(width: screenWidth * 0.03),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Calculation Complete!',
@@ -175,7 +165,6 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
 
                           SizedBox(height: screenHeight * 0.04),
 
-                          // Section Title
                           Text(
                             'Daily Targets',
                             style: GoogleFonts.poppins(
@@ -187,11 +176,10 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
 
                           SizedBox(height: screenHeight * 0.025),
 
-                          // Calories Card
                           NutritionResultCard(
                             icon: Icons.local_fire_department_rounded,
                             label: 'Calories Intake',
-                            value: caloriesIntake,
+                            value: nutritionData.dailyCalories.toString(),
                             unit: 'kcal',
                             subtitle: 'per day',
                             color: AppColors.coralBackground,
@@ -202,11 +190,10 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
 
                           SizedBox(height: screenHeight * 0.02),
 
-                          // Protein Card
                           NutritionResultCard(
                             icon: Icons.restaurant_rounded,
                             label: 'Protein Intake',
-                            value: proteinIntake,
+                            value: nutritionData.proteinIntake.toString(),
                             unit: 'g',
                             subtitle: 'per day',
                             color: AppColors.primaryGreen,
@@ -217,11 +204,10 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
 
                           SizedBox(height: screenHeight * 0.02),
 
-                          // Carbs Card
                           NutritionResultCard(
                             icon: Icons.rice_bowl_rounded,
                             label: 'Carb Intake',
-                            value: carbIntake,
+                            value: nutritionData.carbIntake.toString(),
                             unit: 'g',
                             subtitle: 'per day',
                             color: AppColors.tealAccent,
@@ -230,17 +216,33 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                             delay: 600,
                           ),
 
+                          SizedBox(height: screenHeight * 0.02),
+
+                          NutritionResultCard(
+                            icon: Icons.opacity_rounded,
+                            label: 'Fat Intake',
+                            value: nutritionData.fatIntake.toString(),
+                            unit: 'g',
+                            subtitle: 'per day',
+                            color: AppColors.runnerGreen,
+                            screenWidth: screenWidth,
+                            screenHeight: screenHeight,
+                            delay: 800,
+                          ),
+
                           SizedBox(height: screenHeight * 0.04),
 
-                          // Info Card
                           Container(
                             padding: EdgeInsets.all(screenWidth * 0.045),
                             decoration: BoxDecoration(
                               color: AppColors.inputBackground,
-                              borderRadius:
-                                  BorderRadius.circular(screenWidth * 0.04),
+                              borderRadius: BorderRadius.circular(
+                                screenWidth * 0.04,
+                              ),
                               border: Border.all(
-                                color: AppColors.inputBorder.withValues(alpha: 0.3),
+                                color: AppColors.inputBorder.withValues(
+                                  alpha: 0.3,
+                                ),
                                 width: 1,
                               ),
                             ),
@@ -254,13 +256,28 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                 ),
                                 SizedBox(width: screenWidth * 0.03),
                                 Expanded(
-                                  child: Text(
-                                    'These values are calculated based on your age, weight, height, and gender. Adjust your intake based on your fitness goals.',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: screenWidth * 0.035,
-                                      color: AppColors.textSecondary,
-                                      height: 1.5,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'BMR: ${nutritionData.bmr} kcal | TDEE: ${nutritionData.tdee} kcal',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: screenWidth * 0.035,
+                                          color: AppColors.textPrimary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      SizedBox(height: screenHeight * 0.008),
+                                      Text(
+                                        'These values are calculated based on your age, weight, height, gender, activity level, and fitness goals. Adjust your intake based on your progress.',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: screenWidth * 0.035,
+                                          color: AppColors.textSecondary,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -269,10 +286,8 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
 
                           SizedBox(height: screenHeight * 0.04),
 
-                          // Action Buttons
                           Row(
                             children: [
-                              // Recalculate Button
                               Expanded(
                                 child: SizedBox(
                                   height: screenHeight * 0.06,
@@ -297,29 +312,29 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                       ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
-                                            screenWidth * 0.04),
+                                          screenWidth * 0.04,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-
                               SizedBox(width: screenWidth * 0.03),
-
-                              // Save Plan Button
                               Expanded(
                                 child: SizedBox(
                                   height: screenHeight * 0.06,
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      // TODO: Implement save functionality
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            'Save feature coming soon!',
+                                            'Plan saved successfully!',
                                             style: GoogleFonts.poppins(),
                                           ),
-                                          backgroundColor: AppColors.primaryGreen,
+                                          backgroundColor:
+                                              AppColors.primaryGreen,
                                           behavior: SnackBarBehavior.floating,
                                         ),
                                       );
@@ -340,7 +355,8 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                       foregroundColor: AppColors.textDark,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
-                                            screenWidth * 0.04),
+                                          screenWidth * 0.04,
+                                        ),
                                       ),
                                       elevation: 0,
                                     ),

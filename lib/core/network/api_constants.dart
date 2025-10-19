@@ -6,6 +6,7 @@ class ApiConstants {
   static const String baseUrl = 'http://10.0.2.2:5000/api/v1';
   static const String registerEndpoint = '/auth/register';
   static const String loginEndpoint = '/auth/login';
+  static const String nutritionCalculateEndpoint = '/nutrition/calculate';
 
   static const int connectTimeout = 30000;
   static const int receiveTimeout = 30000;
