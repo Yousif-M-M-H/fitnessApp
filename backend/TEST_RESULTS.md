@@ -18,7 +18,7 @@ All endpoints have been tested and are working correctly!
   "phone": "1234567890"
 }
 ```
-
+ 
 **Response:** `201 Created`
 ```json
 {

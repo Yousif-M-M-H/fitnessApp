@@ -40,5 +40,10 @@ app.use((error, req, res, next) => {
   });
 
 // server
-const port = process.env.PORT || 5001;
-app.listen(port, () => console.log(`server is runing on port: ${port}`));
+const port = process.env.PORT || 5000;
+app.listen(port, '0.0.0.0', () => {
+  console.log(`server is running on port: ${port}`);
+  console.log(`Local: http://localhost:${port}`);
+  console.log(`Network: http://10.129.244.196:${port}`);
+  console.log('Make sure your mobile device is on the same WiFi network!');
+});

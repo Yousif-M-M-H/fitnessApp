@@ -17,8 +17,13 @@ class AppRoutes {
   // Workout routes
   static const String workoutPreferences = '/workout-preferences';
 
+  // Home route
+  static const String home = '/home';
+
+  static const String account = '/account';
+
+
   // Future routes (commented for now)
-  // static const String home = '/home';
   // static const String profile = '/profile';
   // static const String goals = '/goals';
 }

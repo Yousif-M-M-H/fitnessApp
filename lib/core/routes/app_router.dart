@@ -6,7 +6,10 @@ import '../../features/feature_selection/presentation/pages/feature_selection_sc
 import '../../features/nutrition/presentation/pages/nutrition_input_screen.dart';
 import '../../features/nutrition/presentation/pages/nutrition_results_screen.dart';
 import '../../features/workout/presentation/pages/workout_preferences_screen.dart';
+import '../../features/home/presentation/pages/home_screen.dart';
 import 'app_routes.dart';
+import '../../features/account/presentation/pages/account_screen.dart';
+import '../../features/workout/data/models/workout_plan_model.dart';
 
 /// Centralized route configuration for the application
 class AppRouter {
@@ -54,6 +57,18 @@ class AppRouter {
           builder: (_) => const WorkoutPreferencesScreen(),
           settings: settings,
         );
+
+      case AppRoutes.home:
+        final workoutPlan = settings.arguments as WorkoutPlanModel?;
+        return MaterialPageRoute(
+          builder: (_) => HomeScreen(workoutPlan: workoutPlan),
+          settings: settings,
+        );
+        case AppRoutes.account:
+  return MaterialPageRoute(
+    builder: (_) => const AccountScreen(),
+    settings: settings,
+  );
 
       default:
         return MaterialPageRoute(

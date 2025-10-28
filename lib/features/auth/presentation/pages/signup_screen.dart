@@ -84,25 +84,78 @@ class _SignUpViewState extends State<SignUpView> {
     }
   }
 
+  String? _validateFields() {
+    // Check if all fields are filled
+    if (_emailController.text.trim().isEmpty) {
+      return 'Please enter your email address';
+    }
+    if (_passwordController.text.isEmpty) {
+      return 'Please enter a password';
+    }
+    if (_firstNameController.text.trim().isEmpty) {
+      return 'Please enter your first name';
+    }
+    if (_lastNameController.text.trim().isEmpty) {
+      return 'Please enter your last name';
+    }
+    if (_phoneController.text.trim().isEmpty) {
+      return 'Please enter your phone number';
+    }
+    if (_selectedDate == null) {
+      return 'Please select your date of birth';
+    }
+
+    // Email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(_emailController.text.trim())) {
+      return 'Please enter a valid email address';
+    }
+
+    // Password validation (minimum 6 characters as per backend)
+    if (_passwordController.text.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+
+    // Phone validation (only digits)
+    final phoneRegex = RegExp(r'^\d{10,15}$');
+    if (!phoneRegex.hasMatch(_phoneController.text.trim())) {
+      return 'Please enter a valid phone number (10-15 digits)';
+    }
+
+    // Date validation (user must be at least 10 years old and not in future)
+    final now = DateTime.now();
+    final minDate = DateTime(now.year - 120, now.month, now.day);
+    final maxDate = DateTime(now.year - 10, now.month, now.day);
+
+    if (_selectedDate!.isAfter(maxDate)) {
+      return 'You must be at least 10 years old to sign up';
+    }
+    if (_selectedDate!.isBefore(minDate)) {
+      return 'Please enter a valid date of birth';
+    }
+
+    return null; // All validations passed
+  }
+
   void _handleSignUp(BuildContext context) {
-    if (_emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _firstNameController.text.isEmpty ||
-        _lastNameController.text.isEmpty ||
-        _phoneController.text.isEmpty ||
-        _selectedDate == null) {
+    // Validate all fields
+    final errorMessage = _validateFields();
+
+    if (errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please fill in all fields',
+            errorMessage,
             style: GoogleFonts.poppins(),
           ),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
     }
 
+    // All validations passed, proceed with sign up
     context.read<AuthCubit>().signUp(
           email: _emailController.text.trim(),
           password: _passwordController.text,

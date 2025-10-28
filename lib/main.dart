@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/theme/app_colors.dart';
 import 'core/routes/app_router.dart';
+import 'core/network/api_constants.dart';
 
 void main() {
+  // Print network configuration for debugging
+  ApiConstants.printNetworkInfo();
   runApp(const MyApp());
 }
 
