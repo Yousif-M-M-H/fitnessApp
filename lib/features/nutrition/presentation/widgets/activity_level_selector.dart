@@ -96,60 +96,41 @@ class ActivityLevelSelector extends StatelessWidget {
                     width: isSelected ? 2 : 1,
                   ),
                 ),
-                child: Column(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: screenWidth * 0.085,
-                          height: screenWidth * 0.085,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.primaryGreen.withValues(alpha: 0.2)
-                                : AppColors.inputBorder.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(
-                              screenWidth * 0.02,
-                            ),
-                          ),
-                          child: Icon(
-                            level['icon'] as IconData,
-                            color: isSelected
-                                ? AppColors.primaryGreen
-                                : AppColors.textSecondary,
-                            size: screenWidth * 0.045,
-                          ),
+                    Container(
+                      width: screenWidth * 0.085,
+                      height: screenWidth * 0.085,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primaryGreen.withValues(alpha: 0.2)
+                            : AppColors.inputBorder.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(
+                          screenWidth * 0.02,
                         ),
-                        SizedBox(width: screenWidth * 0.02),
-                        Expanded(
-                          child: Text(
-                            level['label'] as String,
-                            style: GoogleFonts.poppins(
-                              fontSize: screenWidth * 0.036,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                              color: isSelected
-                                  ? AppColors.primaryGreen
-                                  : AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+                      child: Icon(
+                        level['icon'] as IconData,
+                        color: isSelected
+                            ? AppColors.primaryGreen
+                            : AppColors.textSecondary,
+                        size: screenWidth * 0.045,
+                      ),
                     ),
-                    SizedBox(height: screenHeight * 0.005),
-                    Padding(
-                      padding: EdgeInsets.only(left: screenWidth * 0.105),
+                    SizedBox(width: screenWidth * 0.02),
+                    Expanded(
                       child: Text(
-                        level['desc'] as String,
+                        level['label'] as String,
                         style: GoogleFonts.poppins(
-                          fontSize: screenWidth * 0.028,
-                          color: AppColors.textSecondary,
-                          height: 1.2,
+                          fontSize: screenWidth * 0.036,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primaryGreen
+                              : AppColors.textPrimary,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

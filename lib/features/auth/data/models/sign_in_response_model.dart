@@ -30,6 +30,19 @@ class UserModel {
   final List<dynamic> workoutPlans;
   final String createdAt;
   final String updatedAt;
+  // Optional workout preferences
+  final String? goal;
+  final String? activityLevel;
+  final int? gymDaysPerWeek;
+  final String? sessionDuration;
+  // Optional nutrition data
+  final String? gender;
+  final double? height;
+  final double? weight;
+  final int? dailyCalories;
+  final int? proteinIntake;
+  final int? carbIntake;
+  final int? fatIntake;
 
   UserModel({
     required this.id,
@@ -43,6 +56,17 @@ class UserModel {
     required this.workoutPlans,
     required this.createdAt,
     required this.updatedAt,
+    this.goal,
+    this.activityLevel,
+    this.gymDaysPerWeek,
+    this.sessionDuration,
+    this.gender,
+    this.height,
+    this.weight,
+    this.dailyCalories,
+    this.proteinIntake,
+    this.carbIntake,
+    this.fatIntake,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +82,17 @@ class UserModel {
       workoutPlans: json['workoutPlans'] as List<dynamic>,
       createdAt: json['createdAt'] as String,
       updatedAt: json['updatedAt'] as String,
+      goal: json['goal'] as String?,
+      activityLevel: json['activityLevel'] as String?,
+      gymDaysPerWeek: json['gymDaysPerWeek'] as int?,
+      sessionDuration: json['sessionDuration'] as String?,
+      gender: json['gender'] as String?,
+      height: (json['height'] as num?)?.toDouble(),
+      weight: (json['weight'] as num?)?.toDouble(),
+      dailyCalories: json['dailyCalories'] as int?,
+      proteinIntake: json['proteinIntake'] as int?,
+      carbIntake: json['carbIntake'] as int?,
+      fatIntake: json['fatIntake'] as int?,
     );
   }
 }

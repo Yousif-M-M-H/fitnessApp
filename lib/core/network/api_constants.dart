@@ -7,7 +7,7 @@ class ApiConstants {
   // - macOS/Linux: Run 'ifconfig' or 'ipconfig getifaddr en0' in terminal
   // - Windows: Run 'ipconfig' in command prompt
   // Look for IPv4 address (e.g., 192.168.1.100, 10.0.0.5, etc.)
-  static const String _localIpAddress = '10.129.244.196'; // Your computer's IP address
+  static const String _localIpAddress = '192.168.0.167'; // Your computer's IP address
 
   static const String _port = '5000';
   static const String _apiVersion = 'api/v1';

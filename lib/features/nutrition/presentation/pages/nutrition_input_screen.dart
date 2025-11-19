@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/services/auth_service.dart';
 import '../../data/datasources/nutrition_remote_datasource.dart';
 import '../../data/repositories/nutrition_repository_impl.dart';
 import '../cubit/nutrition_cubit.dart';
@@ -14,7 +15,14 @@ import '../widgets/activity_level_selector.dart';
 import '../widgets/goal_selector.dart';
 
 class NutritionInputScreen extends StatelessWidget {
-  const NutritionInputScreen({super.key});
+  final bool showBackButton;
+  final VoidCallback? onSuccess;
+
+  const NutritionInputScreen({
+    super.key,
+    this.showBackButton = true,
+    this.onSuccess,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +34,23 @@ class NutritionInputScreen extends StatelessWidget {
           ),
         ),
       ),
-      child: const NutritionInputView(),
+      child: NutritionInputView(
+        showBackButton: showBackButton,
+        onSuccess: onSuccess,
+      ),
     );
   }
 }
 
 class NutritionInputView extends StatefulWidget {
-  const NutritionInputView({super.key});
+  final bool showBackButton;
+  final VoidCallback? onSuccess;
+
+  const NutritionInputView({
+    super.key,
+    required this.showBackButton,
+    this.onSuccess,
+  });
 
   @override
   State<NutritionInputView> createState() => _NutritionInputViewState();
@@ -158,20 +176,22 @@ class _NutritionInputViewState extends State<NutritionInputView>
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        _resetForm();
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        color: AppColors.textPrimary,
-                        size: screenWidth * 0.06,
+                    if (widget.showBackButton) ...[
+                      IconButton(
+                        onPressed: () {
+                          _resetForm();
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(
+                          Icons.arrow_back_ios,
+                          color: AppColors.textPrimary,
+                          size: screenWidth * 0.06,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                    SizedBox(width: screenWidth * 0.04),
+                      SizedBox(width: screenWidth * 0.04),
+                    ],
                     Text(
                       'Nutrition Calculator',
                       style: GoogleFonts.poppins(
@@ -285,19 +305,34 @@ class _NutritionInputViewState extends State<NutritionInputView>
                           SizedBox(height: screenHeight * 0.05),
 
                           BlocConsumer<NutritionCubit, NutritionState>(
-                            listener: (context, state) {
+                            listener: (context, state) async {
                               if (state is NutritionSuccess) {
-                                // Navigate to results and reset form when coming back
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.nutritionResults,
-                                  arguments: state.data,
-                                ).then((_) {
-                                  // Reset form when user comes back from results screen
-                                  _resetForm();
-                                  // Reset cubit state
-                                  context.read<NutritionCubit>().resetState();
-                                });
+                                // Save nutrition data to local storage
+                                await AuthService.markNutritionPlanCompleted(
+                                  dailyCalories: state.data.dailyCalories,
+                                  proteinIntake: state.data.proteinIntake,
+                                  carbIntake: state.data.carbIntake,
+                                  fatIntake: state.data.fatIntake,
+                                );
+
+                                if (widget.onSuccess != null) {
+                                  // Tab flow: Call success callback to refresh tab
+                                  widget.onSuccess!();
+                                } else {
+                                  // Normal flow: Navigate to results screen
+                                  if (context.mounted) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.nutritionResults,
+                                      arguments: state.data,
+                                    ).then((_) {
+                                      // Reset form when user comes back from results screen
+                                      _resetForm();
+                                      // Reset cubit state
+                                      context.read<NutritionCubit>().resetState();
+                                    });
+                                  }
+                                }
                               } else if (state is NutritionError) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

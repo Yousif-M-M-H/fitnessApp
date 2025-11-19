@@ -16,6 +16,14 @@ class WorkoutDayCard extends StatelessWidget {
     required this.screenHeight,
   });
 
+  String _getDayName(int dayNumber) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    if (dayNumber >= 1 && dayNumber <= 7) {
+      return days[dayNumber - 1];
+    }
+    return 'Day $dayNumber';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -34,6 +42,7 @@ class WorkoutDayCard extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => WorkoutDetailsScreen(
                 dayWorkout: dayWorkout,
+                dayName: _getDayName(dayWorkout.day),
               ),
             ),
           );

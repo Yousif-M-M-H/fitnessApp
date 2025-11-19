@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../features/splash/presentation/pages/splash_screen.dart';
 import '../../features/onboarding/presentation/pages/welcome_screen.dart';
 import '../../features/auth/presentation/pages/login_screen.dart';
 import '../../features/auth/presentation/pages/signup_screen.dart';
@@ -16,6 +17,12 @@ class AppRouter {
   /// Generate routes based on route settings
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case AppRoutes.splash:
+        return MaterialPageRoute(
+          builder: (_) => const SplashScreen(),
+          settings: settings,
+        );
+
       case AppRoutes.welcome:
         return MaterialPageRoute(
           builder: (_) => const WelcomeScreen(),
@@ -81,6 +88,6 @@ class AppRouter {
     }
   }
 
-  /// Initial route
-  static const String initialRoute = AppRoutes.welcome;
+  /// Initial route - always starts with splash screen
+  static const String initialRoute = AppRoutes.splash;
 }

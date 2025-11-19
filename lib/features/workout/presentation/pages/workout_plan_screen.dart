@@ -4,7 +4,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../data/models/workout_plan_model.dart';
 import '../widgets/workout_day_card.dart';
 import '../widgets/workout_summary_card.dart';
-import '../widgets/recommendations_card.dart';
 
 class WorkoutPlanScreen extends StatelessWidget {
   final WorkoutPlanModel workoutPlan;
@@ -93,27 +92,6 @@ class WorkoutPlanScreen extends StatelessWidget {
                         ),
                       );
                     }),
-
-                    SizedBox(height: screenHeight * 0.02),
-
-                    // Recommendations Section
-                    Text(
-                      'Recommendations',
-                      style: GoogleFonts.poppins(
-                        fontSize: screenWidth * 0.048,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-
-                    SizedBox(height: screenHeight * 0.02),
-
-                    RecommendationsCard(
-                      recommendations: workoutPlan.recommendations,
-                      generalTips: workoutPlan.generalTips,
-                      screenWidth: screenWidth,
-                      screenHeight: screenHeight,
-                    ),
 
                     SizedBox(height: screenHeight * 0.03),
                   ],

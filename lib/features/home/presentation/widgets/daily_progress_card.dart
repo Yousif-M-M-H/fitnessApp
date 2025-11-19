@@ -6,15 +6,22 @@ import '../../../../core/theme/app_colors.dart';
 class DailyProgressCard extends StatelessWidget {
   final double screenWidth;
   final double screenHeight;
+  final int completedWorkouts;
+  final int totalWorkouts;
 
   const DailyProgressCard({
     super.key,
     required this.screenWidth,
     required this.screenHeight,
+    required this.completedWorkouts,
+    required this.totalWorkouts,
   });
 
   @override
   Widget build(BuildContext context) {
+    final progress = totalWorkouts > 0 ? completedWorkouts / totalWorkouts : 0.0;
+    final progressPercent = (progress * 100).round();
+
     return Container(
       padding: EdgeInsets.all(screenWidth * 0.045),
       decoration: BoxDecoration(
@@ -29,7 +36,7 @@ class DailyProgressCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Daily Progress',
+            'Weekly Progress',
             style: GoogleFonts.poppins(
               fontSize: screenWidth * 0.045,
               fontWeight: FontWeight.bold,
@@ -45,14 +52,14 @@ class DailyProgressCard extends StatelessWidget {
                 height: screenWidth * 0.18,
                 child: CustomPaint(
                   painter: CircularProgressPainter(
-                    progress: 0.75,
+                    progress: progress,
                     progressColor: AppColors.primaryGreen,
                     backgroundColor: AppColors.inputBorder.withValues(alpha: 0.3),
                     strokeWidth: screenWidth * 0.02,
                   ),
                   child: Center(
                     child: Text(
-                      '75%',
+                      '$progressPercent%',
                       style: GoogleFonts.poppins(
                         fontSize: screenWidth * 0.045,
                         fontWeight: FontWeight.bold,
@@ -77,7 +84,7 @@ class DailyProgressCard extends StatelessWidget {
                     ),
                     SizedBox(height: screenHeight * 0.005),
                     Text(
-                      '3 of 4 workouts',
+                      '$completedWorkouts of $totalWorkouts workouts',
                       style: GoogleFonts.poppins(
                         fontSize: screenWidth * 0.035,
                         color: AppColors.textSecondary,

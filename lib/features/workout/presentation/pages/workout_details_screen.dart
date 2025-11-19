@@ -1,20 +1,99 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/auth_service.dart';
 import '../../data/models/workout_plan_model.dart';
 import '../../data/models/exercise_model.dart';
 import '../widgets/exercise_item.dart';
 
-class WorkoutDetailsScreen extends StatelessWidget {
+class WorkoutDetailsScreen extends StatefulWidget {
   final DayWorkout dayWorkout;
+  final String dayName; // e.g., 'Mon', 'Tue', etc.
 
   const WorkoutDetailsScreen({
     super.key,
     required this.dayWorkout,
+    required this.dayName,
   });
 
+  @override
+  State<WorkoutDetailsScreen> createState() => _WorkoutDetailsScreenState();
+}
+
+class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
+  bool _isCompleted = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfCompleted();
+  }
+
+  String _getWeekKey() {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _checkIfCompleted() async {
+    final userData = await AuthService.getUserData();
+    final userId = userData['userId'];
+    if (userId == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final weekKey = _getWeekKey();
+    final storageKey = 'weekly_progress_${userId}_${weekKey}_${widget.dayName}';
+    final completed = prefs.getBool(storageKey) ?? false;
+
+    if (mounted) {
+      setState(() {
+        _isCompleted = completed;
+      });
+    }
+  }
+
+  Future<void> _markAsCompleted() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final userData = await AuthService.getUserData();
+    final userId = userData['userId'];
+    if (userId == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final weekKey = _getWeekKey();
+    final storageKey = 'weekly_progress_${userId}_${weekKey}_${widget.dayName}';
+    await prefs.setBool(storageKey, true);
+
+    if (mounted) {
+      setState(() {
+        _isCompleted = true;
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Great job! Workout completed! 💪',
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: AppColors.primaryGreen,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   String _getWorkoutDescription() {
-    final type = dayWorkout.type.toLowerCase();
+    final type = widget.dayWorkout.type.toLowerCase();
 
     if (type.contains('full body')) {
       return 'This workout targets all major muscle groups for a comprehensive full-body session. Focus on maintaining proper form and controlled movements throughout each exercise.';
@@ -41,7 +120,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Parse exercises
-    final exercises = dayWorkout.exercises
+    final exercises = widget.dayWorkout.exercises
         .map((exerciseString) => ExerciseModel.fromString(exerciseString))
         .toList();
 
@@ -74,14 +153,46 @@ class WorkoutDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: screenWidth * 0.03),
-                    Text(
-                      'Workout Details',
-                      style: GoogleFonts.poppins(
-                        fontSize: screenWidth * 0.055,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        '${widget.dayName} Workout',
+                        style: GoogleFonts.poppins(
+                          fontSize: screenWidth * 0.055,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
+                    if (_isCompleted)
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.03,
+                          vertical: screenHeight * 0.005,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGreen.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: AppColors.primaryGreen,
+                              size: screenWidth * 0.04,
+                            ),
+                            SizedBox(width: screenWidth * 0.01),
+                            Text(
+                              'Done',
+                              style: GoogleFonts.poppins(
+                                fontSize: screenWidth * 0.032,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryGreen,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -97,7 +208,7 @@ class WorkoutDetailsScreen extends StatelessWidget {
                     children: [
                       // Workout title
                       Text(
-                        dayWorkout.type,
+                        widget.dayWorkout.type,
                         style: GoogleFonts.poppins(
                           fontSize: screenWidth * 0.07,
                           fontWeight: FontWeight.bold,
@@ -138,7 +249,48 @@ class WorkoutDetailsScreen extends StatelessWidget {
                         );
                       }),
 
-                      SizedBox(height: screenHeight * 0.02),
+                      SizedBox(height: screenHeight * 0.03),
+
+                      // Finish Workout Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: screenHeight * 0.065,
+                        child: ElevatedButton.icon(
+                          onPressed: _isCompleted || _isLoading
+                              ? null
+                              : _markAsCompleted,
+                          icon: Icon(
+                            _isCompleted
+                                ? Icons.check_circle
+                                : Icons.fitness_center,
+                            size: screenWidth * 0.055,
+                          ),
+                          label: Text(
+                            _isCompleted ? 'Workout Completed' : 'Finish Workout',
+                            style: GoogleFonts.poppins(
+                              fontSize: screenWidth * 0.045,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _isCompleted
+                                ? AppColors.primaryGreen.withValues(alpha: 0.5)
+                                : AppColors.primaryGreen,
+                            foregroundColor: AppColors.textDark,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                screenWidth * 0.04,
+                              ),
+                            ),
+                            elevation: 0,
+                            disabledBackgroundColor:
+                                AppColors.primaryGreen.withValues(alpha: 0.3),
+                            disabledForegroundColor: AppColors.textDark,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: screenHeight * 0.03),
                     ],
                   ),
                 ),

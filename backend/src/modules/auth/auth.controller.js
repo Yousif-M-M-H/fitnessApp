@@ -50,9 +50,13 @@ export const Login = asyncHandler(async (req, res) => {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+  // Return user data without password
+  const userResponse = user.toObject();
+  delete userResponse.password;
+
   res.status(200).json({
     message: 'Login successful',
-    user,
+    user: userResponse,
     token,
   });
 });

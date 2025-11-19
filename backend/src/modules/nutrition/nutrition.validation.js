@@ -25,5 +25,5 @@ export const calculateNutritionSchema = Joi.object({
     'any.required': 'Gender is required'
   }),
   activityLevel: Joi.string().valid('sedentary', 'light', 'moderate', 'active', 'very_active').optional(),
-  goal: Joi.string().valid('lose_weight', 'gain_muscle', 'fitness').optional()
+  goal: Joi.string().valid('lose_weight', 'gain_muscle', 'maintain_weight', 'fitness').optional()
 });

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/auth_service.dart';
 import '../widgets/health_metrics_card.dart';
 import '../widgets/daily_progress_card.dart';
 import '../widgets/weekly_progress_card.dart';
 import '../widgets/total_workouts_chart.dart';
+import '../widgets/nutrition_tab_widget.dart';
 import '../../../account/presentation/pages/account_screen.dart';
 import '../../../workout/data/models/workout_plan_model.dart';
+import '../../../workout/data/services/workout_service.dart';
 import '../../../workout/presentation/pages/workout_plan_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,20 +24,202 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  WorkoutPlanModel? _workoutPlan;
+  bool _isLoadingWorkout = false;
+  final WorkoutService _workoutService = WorkoutService();
+
+  // Nutrition data for Progress tab
+  bool _hasNutritionData = false;
+  int _dailyCalories = 0;
+
+  // Workout progress tracking
+  int _completedWorkouts = 0;
+  int _totalWorkouts = 0;
+  List<int> _weeklyHistory = [0, 0, 0, 0]; // Last 4 weeks
+
+  @override
+  void initState() {
+    super.initState();
+    _workoutPlan = widget.workoutPlan;
+    // If no workout plan provided, try to load it
+    if (_workoutPlan == null) {
+      _loadWorkoutPlan();
+    }
+    _loadNutritionData();
+    _loadWeeklyProgress();
+    _loadWeeklyHistory();
+  }
+
+  Future<void> _loadNutritionData() async {
+    final nutritionData = await AuthService.getNutritionData();
+    if (mounted) {
+      final calories = nutritionData['dailyCalories'];
+      if (calories != null && calories > 0) {
+        setState(() {
+          _hasNutritionData = true;
+          _dailyCalories = calories;
+        });
+      }
+    }
+  }
+
+  String _getWeekKey() {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _loadWeeklyProgress() async {
+    final userData = await AuthService.getUserData();
+    final userId = userData['userId'];
+    if (userId == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final weekKey = _getWeekKey();
+    final storageKey = 'weekly_progress_${userId}_$weekKey';
+
+    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    int completed = 0;
+    int total = 0;
+
+    // Count completed and total workouts based on the workout plan
+    for (final day in days) {
+      final dayIndex = days.indexOf(day);
+      DayWorkout? dayWorkout;
+
+      if (_workoutPlan != null && dayIndex < _workoutPlan!.weeklyPlan.length) {
+        dayWorkout = _workoutPlan!.weeklyPlan[dayIndex];
+      }
+
+      // Only count non-rest days as total workouts
+      if (dayWorkout != null && !dayWorkout.type.toLowerCase().contains('rest')) {
+        total++;
+        final isCompleted = prefs.getBool('${storageKey}_$day') ?? false;
+        if (isCompleted) {
+          completed++;
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _completedWorkouts = completed;
+        _totalWorkouts = total;
+      });
+    }
+  }
+
+  String _getWeekKeyForDate(DateTime date) {
+    final monday = date.subtract(Duration(days: date.weekday - 1));
+    return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _loadWeeklyHistory() async {
+    final userData = await AuthService.getUserData();
+    final userId = userData['userId'];
+    if (userId == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final List<int> history = [];
+
+    // Load last 4 weeks of data
+    for (int weekOffset = 3; weekOffset >= 0; weekOffset--) {
+      final weekDate = DateTime.now().subtract(Duration(days: weekOffset * 7));
+      final weekKey = _getWeekKeyForDate(weekDate);
+      final storageKey = 'weekly_progress_${userId}_$weekKey';
+
+      int weekCompleted = 0;
+      for (final day in days) {
+        final isCompleted = prefs.getBool('${storageKey}_$day') ?? false;
+        if (isCompleted) {
+          weekCompleted++;
+        }
+      }
+      history.add(weekCompleted);
+    }
+
+    if (mounted) {
+      setState(() {
+        _weeklyHistory = history;
+      });
+    }
+  }
+
+  Future<void> _loadWorkoutPlan() async {
+    // Check if user has workout preferences saved
+    final hasWorkoutPlan = await AuthService.hasWorkoutPlan();
+
+    if (!hasWorkoutPlan) return;
+
+    setState(() {
+      _isLoadingWorkout = true;
+    });
+
+    try {
+      final preferences = await AuthService.getWorkoutPreferences();
+
+      // Fetch workout plan using saved preferences
+      final workoutPlan = await _workoutService.customizeWorkoutPlan(
+        gymDaysPerWeek: preferences['gymDaysPerWeek'] ?? 3,
+        fitnessLevel: preferences['activityLevel'] ?? 'beginner',
+        gender: 'male', // Default, could be saved in preferences too
+        sessionDuration: preferences['sessionDuration'] ?? '45-60min',
+      );
+
+      if (mounted) {
+        setState(() {
+          _workoutPlan = workoutPlan;
+          _isLoadingWorkout = false;
+        });
+        // Reload weekly progress now that we have the workout plan
+        _loadWeeklyProgress();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingWorkout = false;
+        });
+      }
+      debugPrint('Error loading workout plan: $e');
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    // Reload weekly progress when switching to Progress tab
+    if (index == 2) {
+      _loadWeeklyProgress();
+      _loadWeeklyHistory();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     Widget body;
 
-    if (_selectedIndex == 1 && widget.workoutPlan != null) {
-      body = WorkoutPlanScreen(workoutPlan: widget.workoutPlan!);
+    if (_selectedIndex == 0) {
+      // Home tab - Show nutrition calculator or results
+      body = const NutritionTabWidget();
+    } else if (_selectedIndex == 1) {
+      // Workouts tab
+      if (_isLoadingWorkout) {
+        // Show loading indicator while fetching workout plan
+        body = Container(
+          decoration: BoxDecoration(gradient: AppColors.darkGradient),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.primaryGreen),
+          ),
+        );
+      } else if (_workoutPlan != null) {
+        body = WorkoutPlanScreen(workoutPlan: _workoutPlan!);
+      } else {
+        body = _buildPlaceholder();
+      }
     } else if (_selectedIndex == 2) {
+      // Progress tab
       body = _buildProgressTab();
     } else {
       body = _buildPlaceholder();
@@ -109,66 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Tab Selector
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.inputBackground,
-                  borderRadius: BorderRadius.circular(screenWidth * 0.08),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            vertical: screenHeight * 0.018,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryGreen,
-                            borderRadius: BorderRadius.circular(
-                              screenWidth * 0.08,
-                            ),
-                          ),
-                          child: Text(
-                            'Goals & Progress',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
-                              fontSize: screenWidth * 0.038,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            vertical: screenHeight * 0.018,
-                          ),
-                          child: Text(
-                            'Next Workout',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
-                              fontSize: screenWidth * 0.038,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            SizedBox(height: screenHeight * 0.03),
+            SizedBox(height: screenHeight * 0.01),
 
             // Scrollable Content
             Expanded(
@@ -189,31 +316,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     SizedBox(height: screenHeight * 0.02),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: HealthMetricsCard(
-                            label: 'BMI',
-                            value: '22.5',
-                            subtitle: 'Healthy',
-                            subtitleColor: AppColors.primaryGreen,
-                            screenWidth: screenWidth,
-                            screenHeight: screenHeight,
+                    if (_hasNutritionData)
+                      HealthMetricsCard(
+                        label: 'Daily Calories',
+                        value: _dailyCalories.toString().replaceAllMapped(
+                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                          (Match m) => '${m[1]},',
+                        ),
+                        subtitle: 'kcal',
+                        subtitleColor: AppColors.textSecondary,
+                        screenWidth: screenWidth,
+                        screenHeight: screenHeight,
+                      )
+                    else
+                      Container(
+                        padding: EdgeInsets.all(screenWidth * 0.045),
+                        decoration: BoxDecoration(
+                          color: AppColors.inputBackground,
+                          borderRadius: BorderRadius.circular(screenWidth * 0.04),
+                          border: Border.all(
+                            color: AppColors.inputBorder.withValues(alpha: 0.3),
+                            width: 1,
                           ),
                         ),
-                        SizedBox(width: screenWidth * 0.04),
-                        Expanded(
-                          child: HealthMetricsCard(
-                            label: 'Daily Calories',
-                            value: '2,100',
-                            subtitle: 'kcal',
-                            subtitleColor: AppColors.textSecondary,
-                            screenWidth: screenWidth,
-                            screenHeight: screenHeight,
-                          ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.restaurant_menu_outlined,
+                              color: AppColors.primaryGreen,
+                              size: screenWidth * 0.1,
+                            ),
+                            SizedBox(height: screenHeight * 0.015),
+                            Text(
+                              'Calculate Your Nutrition',
+                              style: GoogleFonts.poppins(
+                                fontSize: screenWidth * 0.04,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: screenHeight * 0.01),
+                            Text(
+                              'Go to the Nutrition tab to calculate your daily calorie needs',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: screenWidth * 0.032,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
 
                     SizedBox(height: screenHeight * 0.025),
 
@@ -221,6 +374,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     DailyProgressCard(
                       screenWidth: screenWidth,
                       screenHeight: screenHeight,
+                      completedWorkouts: _completedWorkouts,
+                      totalWorkouts: _totalWorkouts,
                     ),
 
                     SizedBox(height: screenHeight * 0.03),
@@ -240,6 +395,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     WeeklyProgressCard(
                       screenWidth: screenWidth,
                       screenHeight: screenHeight,
+                      workoutPlan: _workoutPlan,
+                      onProgressUpdated: () {
+                        _loadWeeklyProgress();
+                        _loadWeeklyHistory();
+                      },
                     ),
 
                     SizedBox(height: screenHeight * 0.025),
@@ -248,6 +408,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     TotalWorkoutsChart(
                       screenWidth: screenWidth,
                       screenHeight: screenHeight,
+                      weeklyData: _weeklyHistory,
                     ),
 
                     SizedBox(height: screenHeight * 0.03),
@@ -326,8 +487,8 @@ Widget _buildPlaceholder() {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(
-                icon: Icons.home_outlined,
-                label: 'Home',
+                icon: Icons.restaurant_menu_outlined,
+                label: 'Nutrition',
                 index: 0,
                 screenWidth: screenWidth,
               ),

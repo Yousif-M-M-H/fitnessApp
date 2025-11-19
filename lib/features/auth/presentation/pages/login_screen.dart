@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/services/auth_service.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../cubit/auth_cubit.dart';
@@ -171,12 +172,26 @@ class _LoginViewState extends State<LoginView> {
 
                   // Log In Button with BlocConsumer
                   BlocConsumer<AuthCubit, AuthState>(
-                    listener: (context, state) {
+                    listener: (context, state) async {
                       if (state is AuthSuccess) {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          AppRoutes.featureSelection,
-                        );
+                        // Check if user has workout plan to determine navigation
+                        final hasWorkoutPlan = await AuthService.hasWorkoutPlan();
+
+                        if (!context.mounted) return;
+
+                        if (hasWorkoutPlan) {
+                          // User has already customized workout, go to home
+                          Navigator.pushReplacementNamed(
+                            context,
+                            AppRoutes.home,
+                          );
+                        } else {
+                          // First time login or no workout plan, go to feature selection
+                          Navigator.pushReplacementNamed(
+                            context,
+                            AppRoutes.featureSelection,
+                          );
+                        }
                       } else if (state is AuthError) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

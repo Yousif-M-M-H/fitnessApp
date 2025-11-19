@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/auth_service.dart';
 import '../widgets/days_selector.dart';
 import '../widgets/fitness_level_selector.dart';
 import '../widgets/duration_selector.dart';
@@ -39,25 +39,17 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen>
       duration: const Duration(milliseconds: 600),
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     _animationController.forward();
   }
@@ -103,9 +95,13 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen>
         sessionDuration: _mapDuration(_selectedDuration),
       );
 
-      // Save workout plan locally
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('has_workout_plan', 'true');
+      // Mark workout plan as completed and save preferences
+      await AuthService.markWorkoutPlanCompleted(
+        gymDaysPerWeek: _selectedDays,
+        activityLevel: _mapFitnessLevel(_selectedFitnessLevel),
+        sessionDuration: _mapDuration(_selectedDuration),
+        goal: 'fitness', // Default goal
+      );
 
       if (!mounted) return;
 
@@ -142,9 +138,7 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen>
     return Scaffold(
       backgroundColor: AppColors.darkGreenBackground,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.darkGradient,
-        ),
+        decoration: BoxDecoration(gradient: AppColors.darkGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -180,9 +174,7 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen>
 
               Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.05,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: SlideTransition(
@@ -255,40 +247,44 @@ class _WorkoutPreferencesScreenState extends State<WorkoutPreferencesScreen>
 
                           SizedBox(height: screenHeight * 0.05),
 
-            SizedBox(
-  width: double.infinity,
-  height: screenHeight * 0.065,
-  child: ElevatedButton(
-    onPressed: _isLoading ? null : _createWorkoutPlan,
-    style: ElevatedButton.styleFrom(
-      backgroundColor: AppColors.primaryGreen,
-      foregroundColor: AppColors.textDark,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(screenWidth * 0.04),
-      ),
-      elevation: 0,
-      disabledBackgroundColor: AppColors.primaryGreen.withValues(alpha: 0.5),
-    ),
-    child: _isLoading
-        ? SizedBox(
-            width: screenWidth * 0.05,
-            height: screenWidth * 0.05,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                AppColors.textDark,
-              ),
-            ),
-          )
-        : Text(
-            'Create My Workout Plan',
-            style: GoogleFonts.poppins(
-              fontSize: screenWidth * 0.045,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-  ),
-),
+                          SizedBox(
+                            width: double.infinity,
+                            height: screenHeight * 0.065,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _createWorkoutPlan,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryGreen,
+                                foregroundColor: AppColors.textDark,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    screenWidth * 0.04,
+                                  ),
+                                ),
+                                elevation: 0,
+                                disabledBackgroundColor: AppColors.primaryGreen
+                                    .withValues(alpha: 0.5),
+                              ),
+                              child: _isLoading
+                                  ? SizedBox(
+                                      width: screenWidth * 0.05,
+                                      height: screenWidth * 0.05,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              AppColors.textDark,
+                                            ),
+                                      ),
+                                    )
+                                  : Text(
+                                      'Create My Workout Plan',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: screenWidth * 0.045,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
 
                           SizedBox(height: screenHeight * 0.03),
                         ],

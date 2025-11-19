@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../data/models/nutrition_response_model.dart';
 import '../widgets/nutrition_result_card.dart';
 
 class NutritionResultsScreen extends StatefulWidget {
-  const NutritionResultsScreen({super.key});
+  final NutritionData? nutritionData;
+  final bool showBackButton;
+  final VoidCallback? onRecalculate;
+
+  const NutritionResultsScreen({
+    super.key,
+    this.nutritionData,
+    this.showBackButton = true,
+    this.onRecalculate,
+  });
 
   @override
   State<NutritionResultsScreen> createState() => _NutritionResultsScreenState();
@@ -51,7 +61,8 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final nutritionData =
+    // Get nutrition data from widget or route arguments
+    final nutritionData = widget.nutritionData ??
         ModalRoute.of(context)!.settings.arguments as NutritionData;
 
     return Scaffold(
@@ -68,17 +79,19 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        color: AppColors.textPrimary,
-                        size: screenWidth * 0.06,
+                    if (widget.showBackButton) ...[
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                          Icons.arrow_back_ios,
+                          color: AppColors.textPrimary,
+                          size: screenWidth * 0.06,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                    SizedBox(width: screenWidth * 0.04),
+                      SizedBox(width: screenWidth * 0.04),
+                    ],
                     Text(
                       'Your Nutrition Plan',
                       style: GoogleFonts.poppins(
@@ -292,7 +305,13 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                 child: SizedBox(
                                   height: screenHeight * 0.06,
                                   child: OutlinedButton.icon(
-                                    onPressed: () => Navigator.pop(context),
+                                    onPressed: () {
+                                      if (widget.onRecalculate != null) {
+                                        widget.onRecalculate!();
+                                      } else {
+                                        Navigator.pop(context);
+                                      }
+                                    },
                                     icon: Icon(
                                       Icons.refresh_rounded,
                                       size: screenWidth * 0.05,
@@ -325,28 +344,19 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                   height: screenHeight * 0.06,
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      ScaffoldMessenger.of(
+                                      Navigator.pushNamed(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Plan saved successfully!',
-                                            style: GoogleFonts.poppins(),
-                                          ),
-                                          backgroundColor:
-                                              AppColors.primaryGreen,
-                                          behavior: SnackBarBehavior.floating,
-                                        ),
+                                        AppRoutes.workoutPreferences,
                                       );
                                     },
                                     icon: Icon(
-                                      Icons.bookmark_rounded,
+                                      Icons.fitness_center_rounded,
                                       size: screenWidth * 0.05,
                                     ),
                                     label: Text(
-                                      'Save Plan',
+                                      'Customize Workout',
                                       style: GoogleFonts.poppins(
-                                        fontSize: screenWidth * 0.038,
+                                        fontSize: screenWidth * 0.032,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),

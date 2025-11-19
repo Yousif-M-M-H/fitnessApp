@@ -1,7 +1,10 @@
 /// Centralized route names for the application
 class AppRoutes {
+  // Splash route
+  static const String splash = '/';
+
   // Onboarding routes
-  static const String welcome = '/';
+  static const String welcome = '/welcome';
 
   // Auth routes
   static const String login = '/login';

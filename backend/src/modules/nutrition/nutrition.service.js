@@ -41,7 +41,7 @@ export const calculateTDEE = (bmr, activityLevel) => {
 /**
  * Calculate daily caloric needs based on goal
  * @param {number} tdee - Total Daily Energy Expenditure
- * @param {string} goal - "lose_weight", "gain_muscle", "fitness"
+ * @param {string} goal - "lose_weight", "gain_muscle", "maintain_weight", "fitness"
  * @returns {number} Daily calorie target
  */
 export const calculateDailyCalories = (tdee, goal) => {
@@ -50,6 +50,7 @@ export const calculateDailyCalories = (tdee, goal) => {
       return Math.round(tdee - 500); // 500 calorie deficit for weight loss
     case 'gain_muscle':
       return Math.round(tdee + 300); // 300 calorie surplus for muscle gain
+    case 'maintain_weight':
     case 'fitness':
     default:
       return Math.round(tdee); // Maintenance calories
@@ -59,7 +60,7 @@ export const calculateDailyCalories = (tdee, goal) => {
 /**
  * Calculate macronutrient distribution
  * @param {number} dailyCalories - Daily caloric intake
- * @param {string} goal - "lose_weight", "gain_muscle", "fitness"
+ * @param {string} goal - "lose_weight", "gain_muscle", "maintain_weight", "fitness"
  * @returns {object} Protein, carbs, and fat in grams
  */
 export const calculateMacros = (dailyCalories, goal) => {
@@ -78,6 +79,7 @@ export const calculateMacros = (dailyCalories, goal) => {
       carbPercentage = 0.45;     // 45%
       fatPercentage = 0.25;      // 25%
       break;
+    case 'maintain_weight':
     case 'fitness':
     default:
       // Balanced macros

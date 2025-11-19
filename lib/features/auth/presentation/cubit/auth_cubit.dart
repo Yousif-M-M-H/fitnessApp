@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/services/auth_service.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/models/sign_up_request_model.dart';
 import '../../data/models/sign_in_request_model.dart';
@@ -44,16 +44,29 @@ class AuthCubit extends Cubit<AuthState> {
 
     try {
       final request = SignInRequestModel(email: email, password: password);
-
       final response = await authRepository.signIn(request);
 
-      // Save token to SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('jwt_token', response.token);
-      await prefs.setString('user_id', response.user.id);
-      await prefs.setString('user_email', response.user.email);
-      await prefs.setString('user_first_name', response.user.firstName);
-      await prefs.setString('user_last_name', response.user.lastName);
+      // Save authentication data including workout and nutrition data
+      await AuthService.saveAuthData(
+        token: response.token,
+        userId: response.user.id,
+        email: response.user.email,
+        firstName: response.user.firstName,
+        lastName: response.user.lastName,
+        phoneNumber: response.user.phone,
+        dateOfBirth: response.user.dateOfBirth,
+        goal: response.user.goal,
+        activityLevel: response.user.activityLevel,
+        gymDaysPerWeek: response.user.gymDaysPerWeek,
+        sessionDuration: response.user.sessionDuration,
+        gender: response.user.gender,
+        height: response.user.height,
+        weight: response.user.weight,
+        dailyCalories: response.user.dailyCalories,
+        proteinIntake: response.user.proteinIntake,
+        carbIntake: response.user.carbIntake,
+        fatIntake: response.user.fatIntake,
+      );
 
       emit(AuthSuccess());
     } catch (e) {
@@ -62,14 +75,12 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await AuthService.clearAuthData();
     emit(AuthInitial());
   }
 
   Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token');
+    return await AuthService.getToken();
   }
 
   void resetState() {

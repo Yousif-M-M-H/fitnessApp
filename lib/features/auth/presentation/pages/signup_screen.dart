@@ -333,9 +333,21 @@ class _SignUpViewState extends State<SignUpView> {
                   BlocConsumer<AuthCubit, AuthState>(
                     listener: (context, state) {
                       if (state is AuthSuccess) {
+                        // Show success message
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Account created successfully! Please sign in.',
+                              style: GoogleFonts.poppins(),
+                            ),
+                            backgroundColor: AppColors.primaryGreen,
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                        // Navigate to login screen
                         Navigator.pushReplacementNamed(
                           context,
-                          AppRoutes.featureSelection,
+                          AppRoutes.login,
                         );
                       } else if (state is AuthError) {
                         ScaffoldMessenger.of(context).showSnackBar(
