@@ -31,8 +31,35 @@ class _AccountScreenState extends State<AccountScreen> {
       _lastName = userData['lastName'] ?? '';
       _email = userData['email'] ?? 'Not provided';
       _phoneNumber = userData['phoneNumber'] ?? 'Not provided';
-      _dateOfBirth = userData['dateOfBirth'] ?? 'Not provided';
+      _dateOfBirth = _formatDate(userData['dateOfBirth'] ?? 'Not provided');
     });
+  }
+
+  String _formatDate(String dateString) {
+    if (dateString == 'Not provided' || dateString.isEmpty) {
+      return 'Not provided';
+    }
+
+    try {
+      // Parse date from format: 2000-01-01
+      final parts = dateString.split('-');
+      if (parts.length != 3) return dateString;
+
+      final year = parts[0];
+      final month = int.parse(parts[1]);
+      final day = int.parse(parts[2]);
+
+      // Month names
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      // Format as: January 1, 2000
+      return '${monthNames[month - 1]} $day, $year';
+    } catch (e) {
+      return dateString; // Return original if parsing fails
+    }
   }
 
   String _getInitials() {
