@@ -57,7 +57,7 @@ class DayWorkout {
   final int day;
   final String type;
   final String duration;
-  final List<String> exercises;
+  final List<ExerciseData> exercises;
 
   DayWorkout({
     required this.day,
@@ -67,11 +67,41 @@ class DayWorkout {
   });
 
   factory DayWorkout.fromJson(Map<String, dynamic> json) {
+    final exercisesJson = json['exercises'] as List;
+
+    // Handle both old format (strings) and new format (objects with description)
+    final exercises = exercisesJson.map((ex) {
+      if (ex is String) {
+        // Old format: just exercise string
+        return ExerciseData(exercise: ex, description: '');
+      } else {
+        // New format: object with exercise and description
+        return ExerciseData.fromJson(ex as Map<String, dynamic>);
+      }
+    }).toList();
+
     return DayWorkout(
       day: json['day'],
       type: json['type'],
       duration: json['duration'],
-      exercises: List<String>.from(json['exercises']),
+      exercises: exercises,
+    );
+  }
+}
+
+class ExerciseData {
+  final String exercise;
+  final String description;
+
+  ExerciseData({
+    required this.exercise,
+    required this.description,
+  });
+
+  factory ExerciseData.fromJson(Map<String, dynamic> json) {
+    return ExerciseData(
+      exercise: json['exercise'] ?? '',
+      description: json['description'] ?? '',
     );
   }
 }

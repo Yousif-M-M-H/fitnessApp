@@ -22,7 +22,6 @@ class ExerciseItem extends StatefulWidget {
 
 class _ExerciseItemState extends State<ExerciseItem> {
   bool _isExpanded = false;
-  bool _isStarted = false;
 
   IconData _getExerciseIcon() {
     final name = widget.exercise.name.toLowerCase();
@@ -34,27 +33,6 @@ class _ExerciseItemState extends State<ExerciseItem> {
     if (name.contains('run') || name.contains('cardio')) return Icons.directions_run;
     if (name.contains('lunge')) return Icons.directions_walk;
     return Icons.fitness_center;
-  }
-
-  void _handleStartWorkout() {
-    setState(() {
-      _isStarted = !_isStarted;
-    });
-
-    // Show feedback to user
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isStarted
-            ? 'Started ${widget.exercise.name}!'
-            : 'Paused ${widget.exercise.name}',
-          style: GoogleFonts.poppins(),
-        ),
-        backgroundColor: AppColors.primaryGreen,
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   @override
@@ -131,49 +109,68 @@ class _ExerciseItemState extends State<ExerciseItem> {
               ),
             ),
           ),
-          // Expanded content
+          // Expanded content - show description
           if (_isExpanded)
             Container(
               padding: EdgeInsets.fromLTRB(
                 widget.screenWidth * 0.04,
-                0,
+                widget.screenHeight * 0.01,
                 widget.screenWidth * 0.04,
-                widget.screenWidth * 0.06,
+                widget.screenWidth * 0.04,
               ),
-              child: widget.exercise.isTimeBased && widget.exercise.timeInSeconds != null
-                  // For time-based exercises: Show only timer (no button)
-                  ? ExerciseTimer(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: AppColors.inputBorder.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: widget.screenHeight * 0.015),
+                  // Description title
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppColors.primaryGreen,
+                        size: widget.screenWidth * 0.045,
+                      ),
+                      SizedBox(width: widget.screenWidth * 0.02),
+                      Text(
+                        'How to perform:',
+                        style: GoogleFonts.poppins(
+                          fontSize: widget.screenWidth * 0.038,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: widget.screenHeight * 0.012),
+                  // Description text
+                  Text(
+                    widget.exercise.description.isNotEmpty
+                        ? widget.exercise.description
+                        : 'Perform this exercise with proper form and controlled movements.',
+                    style: GoogleFonts.poppins(
+                      fontSize: widget.screenWidth * 0.036,
+                      color: AppColors.textSecondary,
+                      height: 1.5,
+                    ),
+                  ),
+                  // Show timer for time-based exercises
+                  if (widget.exercise.isTimeBased && widget.exercise.timeInSeconds != null) ...[
+                    SizedBox(height: widget.screenHeight * 0.02),
+                    ExerciseTimer(
                       initialSeconds: widget.exercise.timeInSeconds!,
                       screenWidth: widget.screenWidth,
-                    )
-                  // For rep-based exercises: Show start button
-                  : Column(
-                      children: [
-                        SizedBox(height: widget.screenHeight * 0.01),
-                        SizedBox(
-                          width: double.infinity,
-                          height: widget.screenHeight * 0.06,
-                          child: ElevatedButton(
-                            onPressed: _handleStartWorkout,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryGreen,
-                              foregroundColor: AppColors.textDark,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(widget.screenWidth * 0.03),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              'Start Workout',
-                              style: GoogleFonts.poppins(
-                                fontSize: widget.screenWidth * 0.04,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
+                  ],
+                ],
+              ),
             ),
         ],
       ),

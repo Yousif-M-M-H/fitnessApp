@@ -4,6 +4,111 @@
  */
 
 /**
+ * Exercise descriptions database
+ * Maps exercise names to their detailed descriptions
+ */
+const exerciseDescriptions = {
+  // Squats
+  'Bodyweight Squats': 'Stand with feet shoulder-width apart. Lower your body by bending knees and pushing hips back as if sitting in a chair. Keep chest up and weight on heels. Push through heels to return to starting position.',
+  'Goblet Squats': 'Hold a dumbbell or kettlebell at chest level. Squat down keeping your chest up and elbows between your knees. Push through heels to stand.',
+  'Barbell Squats': 'Place barbell on upper back. Stand with feet shoulder-width apart. Lower by bending knees while keeping chest up. Drive through heels to return.',
+  'Front Squats': 'Rest barbell on front shoulders. Keep elbows high and chest up. Squat down maintaining upright torso. Drive through heels to stand.',
+  'Squats': 'Classic lower body exercise. Lower your hips from standing position then stand back up. Keep core tight and back straight throughout the movement.',
+
+  // Pressing movements
+  'Push-ups': 'Start in plank position with hands shoulder-width apart. Lower chest to ground keeping body straight. Push back up to starting position.',
+  'Knee Push-ups': 'Same as push-ups but with knees on ground. Great for building upper body strength for beginners.',
+  'Bench Press': 'Lie on bench, grip barbell slightly wider than shoulders. Lower bar to chest, then press up powerfully. Keep feet planted and back slightly arched.',
+  'Incline Dumbbell Press': 'Set bench to 30-45 degrees. Press dumbbells up from chest level. Control the descent and maintain steady tempo.',
+  'Incline Barbell Press': 'Inclined bench press targeting upper chest. Press barbell from upper chest to full extension.',
+  'Dumbbell Chest Press': 'Lie on bench with dumbbells. Press weights up until arms are extended, then lower with control.',
+  'Overhead Press': 'Press barbell or dumbbells overhead from shoulder level. Keep core tight and avoid leaning back.',
+  'Shoulder Press': 'Seated or standing press with dumbbells from shoulders to overhead. Maintain neutral spine.',
+
+  // Pulling movements
+  'Dumbbell Rows': 'Bend at hips with dumbbell in hand. Pull weight to hip while squeezing shoulder blade. Lower with control.',
+  'Barbell Rows': 'Hinge at hips holding barbell. Pull bar to lower chest/upper abs while keeping back straight.',
+  'Seated Cable Rows': 'Sit at cable machine. Pull handle to torso while keeping back straight. Squeeze shoulder blades together.',
+  'T-Bar Rows': 'Straddle T-bar, hinge at hips. Pull weight to chest while maintaining straight back.',
+  'Pull-ups': 'Hang from bar with overhand grip. Pull yourself up until chin clears bar. Lower with control.',
+  'Weighted Pull-ups': 'Pull-ups with added weight via belt or weighted vest for advanced strength building.',
+  'Lat Pulldowns': 'Sit at lat pulldown machine. Pull bar down to upper chest while keeping torso upright.',
+
+  // Deadlifts
+  'Deadlifts': 'Stand with feet under barbell. Grip bar, keep back straight, drive through legs and hips to stand. Lower with control.',
+  'Romanian Deadlifts': 'Hold barbell at hips. Hinge forward keeping legs nearly straight. Feel hamstring stretch, then return to standing.',
+
+  // Lunges
+  'Lunges': 'Step forward into lunge position. Lower back knee toward ground. Push through front heel to return.',
+  'Walking Lunges': 'Perform lunges while walking forward. Alternate legs with each step.',
+  'Bulgarian Split Squats': 'Place rear foot on bench. Lower into single leg squat. Press through front heel to stand.',
+
+  // Triceps
+  'Tricep Dips': 'Using parallel bars or bench, lower body by bending elbows. Press back up to starting position.',
+  'Tricep Pushdowns': 'At cable machine, push rope or bar down by extending elbows. Keep upper arms stationary.',
+  'Tricep Extensions': 'Extend arms overhead or behind head with weight. Focus on elbow movement only.',
+  'Skull Crushers': 'Lying down, lower weight toward forehead by bending elbows. Extend arms to return.',
+  'Close-Grip Bench': 'Bench press with narrow grip to emphasize triceps. Keep elbows closer to body.',
+
+  // Biceps
+  'Dumbbell Curls': 'Stand with dumbbells at sides. Curl weights up by bending elbows. Lower with control.',
+  'Barbell Curls': 'Grip barbell with underhand grip. Curl weight up while keeping elbows stationary.',
+  'Hammer Curls': 'Hold dumbbells with neutral grip (palms facing each other). Curl up maintaining grip position.',
+  'Preacher Curls': 'Rest upper arms on preacher bench. Curl weight up focusing on bicep contraction.',
+  'Bicep Curls': 'Classic bicep curl with dumbbells or barbell. Focus on controlled movement and full range.',
+
+  // Shoulders
+  'Lateral Raises': 'Hold dumbbells at sides. Raise arms out to sides until parallel with ground. Lower slowly.',
+  'Face Pulls': 'Pull rope attachment toward face at cable machine. Focus on rear delts and upper back.',
+  'Rear Delt Flyes': 'Bent over or on incline bench, raise dumbbells out to sides targeting rear shoulders.',
+  'Cable Flyes': 'Using cable machine at chest height, bring handles together in front of chest.',
+
+  // Legs
+  'Leg Press': 'Seated at leg press machine. Push platform away by extending legs. Lower with control.',
+  'Leg Curls': 'Lying or seated, curl legs by bending knees against resistance.',
+  'Leg Extensions': 'Seated, extend legs by straightening knees against resistance pad.',
+  'Calf Raises': 'Stand on edge of platform. Raise up onto toes, then lower heels below platform level.',
+  'Standing Calf Raises': 'Standing calf raises with barbell or machine. Full range of motion for calf development.',
+
+  // Core
+  'Plank': 'Hold push-up position on forearms. Keep body straight from head to heels. Engage core throughout.',
+  'Bicycle Crunches': 'Lying on back, alternate bringing elbow to opposite knee in cycling motion.',
+  'Russian Twists': 'Seated with feet elevated, twist torso side to side while holding weight.',
+  'Hanging Knee Raises': 'Hang from bar, raise knees toward chest by contracting abs.',
+  'Hanging Leg Raises': 'Hang from bar with straight legs, raise feet toward bar using abs.',
+  'Cable Crunches': 'Kneeling at cable machine, crunch down by contracting abs against resistance.',
+  'Ab Wheel Rollouts': 'On knees with ab wheel, roll forward extending body, then pull back using core.',
+  'Cable Woodchoppers': 'Rotate torso pulling cable from high to low position diagonally across body.',
+  'Weighted Planks': 'Standard plank with weight plate on back for increased difficulty.',
+  'Core Circuit': 'Series of core exercises performed back-to-back with minimal rest.',
+
+  // Compound movements
+  'Dips': 'Support yourself on parallel bars. Lower body by bending elbows, then press back up.',
+
+  // Cardio & Recovery
+  'Treadmill Walk': 'Walk at moderate pace on treadmill. Maintain steady breathing and posture.',
+  'Light Walk': 'Easy-paced walk outdoors or indoors for active recovery.',
+  'Light Jog': 'Slow, comfortable jogging pace for cardiovascular health and recovery.',
+  'Light Bike': 'Low-intensity cycling for active recovery and mobility.',
+  'Light Stretching': 'Gentle stretching routine to improve flexibility and reduce muscle tension.',
+  'Dynamic Stretching': 'Active stretching with movement to improve mobility and warm up muscles.',
+  'Yoga': 'Yoga practice focusing on flexibility, balance, and mindful movement.',
+  'Swimming': 'Low-impact swimming for full-body conditioning and recovery.',
+  'Mobility Work': 'Exercises focused on improving joint range of motion and movement quality.',
+  'HIIT Cardio': 'High-Intensity Interval Training alternating between intense bursts and recovery periods.',
+  'HIIT Sprints': 'Short, maximum effort sprints followed by rest periods.',
+};
+
+/**
+ * Get exercise description
+ * @param {string} exerciseName - Name of the exercise
+ * @returns {string} Description of the exercise
+ */
+const getExerciseDescription = (exerciseName) => {
+  return exerciseDescriptions[exerciseName] || 'Perform this exercise with proper form and controlled movements.';
+};
+
+/**
  * Generate workout plan based on user parameters
  * @param {object} params - User workout preferences
  * @returns {object} Customized workout plan
@@ -214,15 +319,27 @@ export const generateWorkoutPlan = ({ gymDaysPerWeek, fitnessLevel, gender, sess
     }
   };
 
-  // Build the workout plan
+  // Build the workout plan with exercise descriptions
   const workoutPlan = split.map((day, index) => {
-    const exercises = exerciseDatabase[day]?.[fitnessLevel] || exerciseDatabase['Full Body'][fitnessLevel];
+    const exerciseStrings = exerciseDatabase[day]?.[fitnessLevel] || exerciseDatabase['Full Body'][fitnessLevel];
+
+    // Transform each exercise string to include description
+    const exercisesWithDescriptions = exerciseStrings.map(exerciseStr => {
+      // Extract exercise name (before the ' - ')
+      const exerciseName = exerciseStr.split(' - ')[0].trim();
+      const description = getExerciseDescription(exerciseName);
+
+      return {
+        exercise: exerciseStr,
+        description: description
+      };
+    });
 
     return {
       day: index + 1,
       type: day,
       duration: sessionDuration,
-      exercises: exercises
+      exercises: exercisesWithDescriptions
     };
   });
 

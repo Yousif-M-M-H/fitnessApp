@@ -4,6 +4,7 @@ class ExerciseModel {
   final String reps;
   final bool isTimeBased;
   final int? timeInSeconds;
+  final String description;
 
   ExerciseModel({
     required this.name,
@@ -11,19 +12,21 @@ class ExerciseModel {
     required this.reps,
     this.isTimeBased = false,
     this.timeInSeconds,
+    this.description = '',
   });
 
-  /// Parse exercise string from backend
+  /// Parse exercise string from backend with optional description
   /// Examples:
   /// - "Bodyweight Squats - 3x12" -> name: "Bodyweight Squats", sets: "3", reps: "12"
   /// - "Plank - 3x30sec" -> name: "Plank", sets: "3", reps: "30sec", isTimeBased: true
-  factory ExerciseModel.fromString(String exerciseString) {
+  factory ExerciseModel.fromString(String exerciseString, {String description = ''}) {
     final parts = exerciseString.split(' - ');
     if (parts.length != 2) {
       return ExerciseModel(
         name: exerciseString,
         sets: '0',
         reps: '0',
+        description: description,
       );
     }
 
@@ -37,6 +40,7 @@ class ExerciseModel {
         name: name,
         sets: '0',
         reps: '0',
+        description: description,
       );
     }
 
@@ -66,6 +70,7 @@ class ExerciseModel {
       reps: reps,
       isTimeBased: isTimeBased,
       timeInSeconds: timeInSeconds,
+      description: description,
     );
   }
 

@@ -119,9 +119,12 @@ class _WorkoutDetailsScreenState extends State<WorkoutDetailsScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Parse exercises
+    // Parse exercises with descriptions
     final exercises = widget.dayWorkout.exercises
-        .map((exerciseString) => ExerciseModel.fromString(exerciseString))
+        .map((exerciseData) => ExerciseModel.fromString(
+              exerciseData.exercise,
+              description: exerciseData.description,
+            ))
         .toList();
 
     return Scaffold(
