@@ -7,7 +7,9 @@ import '../../../nutrition/presentation/pages/nutrition_results_screen.dart';
 
 /// Smart nutrition widget that shows calculator or results based on user data
 class NutritionTabWidget extends StatefulWidget {
-  const NutritionTabWidget({super.key});
+  final VoidCallback? onNutritionUpdated;
+
+  const NutritionTabWidget({super.key, this.onNutritionUpdated});
 
   @override
   State<NutritionTabWidget> createState() => _NutritionTabWidgetState();
@@ -45,6 +47,8 @@ class _NutritionTabWidgetState extends State<NutritionTabWidget> {
           );
           _isLoading = false;
         });
+        // Notify parent that nutrition data was updated
+        widget.onNutritionUpdated?.call();
       }
     } else {
       if (mounted) {

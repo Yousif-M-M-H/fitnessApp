@@ -189,8 +189,9 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    // Reload weekly progress when switching to Progress tab
+    // Reload data when switching to Progress tab
     if (index == 2) {
+      _loadNutritionData(); // Reload nutrition data
       _loadWeeklyProgress();
       _loadWeeklyHistory();
     }
@@ -202,7 +203,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_selectedIndex == 0) {
       // Home tab - Show nutrition calculator or results
-      body = const NutritionTabWidget();
+      body = NutritionTabWidget(
+        onNutritionUpdated: _loadNutritionData,
+      );
     } else if (_selectedIndex == 1) {
       // Workouts tab
       if (_isLoadingWorkout) {
