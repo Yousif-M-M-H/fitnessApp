@@ -103,7 +103,7 @@ class WelcomeView extends StatelessWidget {
                   FeatureItem(
                     icon: Icons.fitness_center,
                     title: 'Custom Workouts',
-                    description: 'AI-powered workout plans tailored to your fitness level.',
+                    description: 'Personalized workout plans designed for your fitness level.',
                     screenWidth: screenWidth,
                     screenHeight: screenHeight,
                   ),
