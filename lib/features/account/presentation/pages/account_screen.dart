@@ -41,8 +41,12 @@ class _AccountScreenState extends State<AccountScreen> {
     }
 
     try {
+      // Handle both ISO timestamps (2000-01-01T00:00:00.000Z) and simple dates (2000-01-01)
+      // Extract just the date part before any 'T' character
+      final datePart = dateString.split('T')[0];
+
       // Parse date from format: 2000-01-01
-      final parts = dateString.split('-');
+      final parts = datePart.split('-');
       if (parts.length != 3) return dateString;
 
       final year = parts[0];

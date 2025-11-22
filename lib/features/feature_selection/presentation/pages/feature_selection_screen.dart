@@ -59,12 +59,8 @@ class _FeatureSelectionScreenState extends State<FeatureSelectionScreen>
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: AppColors.darkGreenBackground,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.darkGradient,
-        ),
-        child: SafeArea(
+      backgroundColor: AppColors.darkBackground,
+      body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: screenWidth * 0.05,
@@ -175,41 +171,10 @@ class _FeatureSelectionScreenState extends State<FeatureSelectionScreen>
                   ),
                 ),
 
-                SizedBox(height: screenHeight * 0.015),
-
-                // Skip for now button
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: TextButton(
-                    onPressed: () {
-                      // TODO: Navigate to home screen or skip this step
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Skip feature - Navigate to home',
-                            style: GoogleFonts.poppins(),
-                          ),
-                          backgroundColor: AppColors.darkGreenBackground,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    child: Text(
-                      'Skip for now',
-                      style: GoogleFonts.poppins(
-                        fontSize: screenWidth * 0.036,
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: screenHeight * 0.01),
+                SizedBox(height: screenHeight * 0.02),
               ],
             ),
           ),
-        ),
       ),
     );
   }

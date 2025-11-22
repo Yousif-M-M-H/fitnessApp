@@ -172,12 +172,8 @@ class _SignUpViewState extends State<SignUpView> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: AppColors.darkGreenBackground,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.darkGradient,
-        ),
-        child: SafeArea(
+      backgroundColor: AppColors.darkBackground,
+      body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -216,7 +212,7 @@ class _SignUpViewState extends State<SignUpView> {
                     ),
                   ),
 
-                  SizedBox(height: screenHeight * 0.06),
+                  SizedBox(height: screenHeight * 0.04),
 
                   // Email field
                   CustomTextField(
@@ -401,7 +397,7 @@ class _SignUpViewState extends State<SignUpView> {
                     },
                   ),
 
-                  SizedBox(height: screenHeight * 0.15),
+                  SizedBox(height: screenHeight * 0.03),
 
                   // Already have an account
                   Center(
@@ -442,7 +438,6 @@ class _SignUpViewState extends State<SignUpView> {
               ),
             ),
           ),
-        ),
       ),
     );
   }

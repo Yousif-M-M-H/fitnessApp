@@ -6,7 +6,6 @@ import '../../../../core/services/auth_service.dart';
 import '../widgets/health_metrics_card.dart';
 import '../widgets/daily_progress_card.dart';
 import '../widgets/weekly_progress_card.dart';
-import '../widgets/total_workouts_chart.dart';
 import '../widgets/nutrition_tab_widget.dart';
 import '../../../account/presentation/pages/account_screen.dart';
 import '../../../workout/data/models/workout_plan_model.dart';
@@ -35,7 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
   // Workout progress tracking
   int _completedWorkouts = 0;
   int _totalWorkouts = 0;
-  List<int> _weeklyHistory = [0, 0, 0, 0]; // Last 4 weeks
 
   @override
   void initState() {
@@ -47,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     _loadNutritionData();
     _loadWeeklyProgress();
-    _loadWeeklyHistory();
   }
 
   Future<void> _loadNutritionData() async {
@@ -109,43 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  String _getWeekKeyForDate(DateTime date) {
-    final monday = date.subtract(Duration(days: date.weekday - 1));
-    return '${monday.year}-${monday.month.toString().padLeft(2, '0')}-${monday.day.toString().padLeft(2, '0')}';
-  }
-
-  Future<void> _loadWeeklyHistory() async {
-    final userData = await AuthService.getUserData();
-    final userId = userData['userId'];
-    if (userId == null) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final List<int> history = [];
-
-    // Load last 4 weeks of data
-    for (int weekOffset = 3; weekOffset >= 0; weekOffset--) {
-      final weekDate = DateTime.now().subtract(Duration(days: weekOffset * 7));
-      final weekKey = _getWeekKeyForDate(weekDate);
-      final storageKey = 'weekly_progress_${userId}_$weekKey';
-
-      int weekCompleted = 0;
-      for (final day in days) {
-        final isCompleted = prefs.getBool('${storageKey}_$day') ?? false;
-        if (isCompleted) {
-          weekCompleted++;
-        }
-      }
-      history.add(weekCompleted);
-    }
-
-    if (mounted) {
-      setState(() {
-        _weeklyHistory = history;
-      });
-    }
-  }
-
   Future<void> _loadWorkoutPlan() async {
     // Check if user has workout preferences saved
     final hasWorkoutPlan = await AuthService.hasWorkoutPlan();
@@ -193,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (index == 2) {
       _loadNutritionData(); // Reload nutrition data
       _loadWeeklyProgress();
-      _loadWeeklyHistory();
     }
   }
 
@@ -252,49 +211,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 horizontal: screenWidth * 0.05,
                 vertical: screenHeight * 0.02,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Profile Icon
-                  Container(
-                    width: screenWidth * 0.11,
-                    height: screenWidth * 0.11,
-                    decoration: BoxDecoration(
-                      color: AppColors.inputBackground,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.person_outline,
-                      color: AppColors.textPrimary,
-                      size: screenWidth * 0.06,
-                    ),
+              child: Center(
+                child: Text(
+                  'Fitness Tracker',
+                  style: GoogleFonts.poppins(
+                    fontSize: screenWidth * 0.055,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
-
-                  // Title
-                  Text(
-                    'Fitness Tracker',
-                    style: GoogleFonts.poppins(
-                      fontSize: screenWidth * 0.055,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-
-                  // Settings Icon
-                  Container(
-                    width: screenWidth * 0.11,
-                    height: screenWidth * 0.11,
-                    decoration: BoxDecoration(
-                      color: AppColors.inputBackground,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.settings_outlined,
-                      color: AppColors.textPrimary,
-                      size: screenWidth * 0.06,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
 
@@ -401,17 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       workoutPlan: _workoutPlan,
                       onProgressUpdated: () {
                         _loadWeeklyProgress();
-                        _loadWeeklyHistory();
                       },
-                    ),
-
-                    SizedBox(height: screenHeight * 0.025),
-
-                    // Total Workouts Chart
-                    TotalWorkoutsChart(
-                      screenWidth: screenWidth,
-                      screenHeight: screenHeight,
-                      weeklyData: _weeklyHistory,
                     ),
 
                     SizedBox(height: screenHeight * 0.03),

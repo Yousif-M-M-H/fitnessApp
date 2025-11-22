@@ -46,15 +46,37 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
+  String? _validateFields() {
+    // Check if fields are empty
+    if (_emailController.text.trim().isEmpty) {
+      return 'Please enter your email address';
+    }
+    if (_passwordController.text.isEmpty) {
+      return 'Please enter your password';
+    }
+
+    // Email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(_emailController.text.trim())) {
+      return 'Please enter a valid email address';
+    }
+
+    return null; // All validations passed
+  }
+
   void _handleSignIn(BuildContext context) {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    // Validate fields
+    final errorMessage = _validateFields();
+
+    if (errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please enter email and password',
+            errorMessage,
             style: GoogleFonts.poppins(),
           ),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
@@ -72,12 +94,8 @@ class _LoginViewState extends State<LoginView> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: AppColors.darkGreenBackground,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.darkGradient,
-        ),
-        child: SafeArea(
+      backgroundColor: AppColors.darkBackground,
+      body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -98,7 +116,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
 
-                  SizedBox(height: screenHeight * 0.15),
+                  SizedBox(height: screenHeight * 0.05),
 
                   // Welcome Back
                   Text(
@@ -122,7 +140,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
 
-                  SizedBox(height: screenHeight * 0.06),
+                  SizedBox(height: screenHeight * 0.04),
 
                   // Email field
                   CustomTextField(
@@ -280,7 +298,6 @@ class _LoginViewState extends State<LoginView> {
               ),
             ),
           ),
-        ),
       ),
     );
   }

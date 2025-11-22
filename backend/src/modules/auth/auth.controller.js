@@ -10,7 +10,7 @@ export const Register = asyncHandler(async (req, res) => {
   const user = await User.create(req.body);
 
   // Return user data without password
-  const userResponse = user.toObject();
+  const userResponse = user.toJSON();
   delete userResponse.password;
 
   res.status(201).json({
@@ -51,7 +51,7 @@ export const Login = asyncHandler(async (req, res) => {
   });
 
   // Return user data without password
-  const userResponse = user.toObject();
+  const userResponse = user.toJSON();
   delete userResponse.password;
 
   res.status(200).json({
