@@ -9,12 +9,14 @@ class NutritionResultsScreen extends StatefulWidget {
   final NutritionData? nutritionData;
   final bool showBackButton;
   final VoidCallback? onRecalculate;
+  final bool showCustomizeWorkout;
 
   const NutritionResultsScreen({
     super.key,
     this.nutritionData,
     this.showBackButton = true,
     this.onRecalculate,
+    this.showCustomizeWorkout = true,
   });
 
   @override
@@ -299,10 +301,86 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
 
                           SizedBox(height: screenHeight * 0.04),
 
-                          Row(
-                            children: [
-                              Expanded(
-                                child: SizedBox(
+                          // Show full width recalculate button OR row with both buttons
+                          widget.showCustomizeWorkout
+                              ? Row(
+                                  children: [
+                                    Expanded(
+                                      child: SizedBox(
+                                        height: screenHeight * 0.06,
+                                        child: OutlinedButton.icon(
+                                          onPressed: () {
+                                            if (widget.onRecalculate != null) {
+                                              widget.onRecalculate!();
+                                            } else {
+                                              Navigator.pop(context);
+                                            }
+                                          },
+                                          icon: Icon(
+                                            Icons.refresh_rounded,
+                                            size: screenWidth * 0.05,
+                                          ),
+                                          label: Text(
+                                            'Recalculate',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: screenWidth * 0.038,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: AppColors.primaryGreen,
+                                            side: BorderSide(
+                                              color: AppColors.primaryGreen,
+                                              width: 1.5,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                screenWidth * 0.04,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: screenWidth * 0.03),
+                                    Expanded(
+                                      child: SizedBox(
+                                        height: screenHeight * 0.06,
+                                        child: ElevatedButton.icon(
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              AppRoutes.workoutPreferences,
+                                            );
+                                          },
+                                          icon: Icon(
+                                            Icons.fitness_center_rounded,
+                                            size: screenWidth * 0.05,
+                                          ),
+                                          label: Text(
+                                            'Customize Workout',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: screenWidth * 0.032,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primaryGreen,
+                                            foregroundColor: AppColors.textDark,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                screenWidth * 0.04,
+                                              ),
+                                            ),
+                                            elevation: 0,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : SizedBox(
+                                  width: double.infinity,
                                   height: screenHeight * 0.06,
                                   child: OutlinedButton.icon(
                                     onPressed: () {
@@ -319,7 +397,7 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                     label: Text(
                                       'Recalculate',
                                       style: GoogleFonts.poppins(
-                                        fontSize: screenWidth * 0.038,
+                                        fontSize: screenWidth * 0.042,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -337,44 +415,6 @@ class _NutritionResultsScreenState extends State<NutritionResultsScreen>
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(width: screenWidth * 0.03),
-                              Expanded(
-                                child: SizedBox(
-                                  height: screenHeight * 0.06,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.workoutPreferences,
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.fitness_center_rounded,
-                                      size: screenWidth * 0.05,
-                                    ),
-                                    label: Text(
-                                      'Customize Workout',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: screenWidth * 0.032,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primaryGreen,
-                                      foregroundColor: AppColors.textDark,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          screenWidth * 0.04,
-                                        ),
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
 
                           SizedBox(height: screenHeight * 0.03),
                         ],

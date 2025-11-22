@@ -56,8 +56,8 @@ class _NutritionTabWidgetState extends State<NutritionTabWidget> {
     }
   }
 
-  void _handleRecalculate() async {
-    // Clear nutrition data from storage
+  Future<void> _handleRecalculate() async {
+    // Clear nutrition data from storage using AuthService
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_nutrition_plan', false);
     await prefs.remove('daily_calories');
@@ -83,10 +83,11 @@ class _NutritionTabWidgetState extends State<NutritionTabWidget> {
     }
 
     if (_hasNutritionPlan && _nutritionData != null) {
-      // Show nutrition results without back button (shown as tab)
+      // Show nutrition results without back button and without customize workout button
       return NutritionResultsScreen(
         nutritionData: _nutritionData!,
         showBackButton: false,
+        showCustomizeWorkout: false,
         onRecalculate: _handleRecalculate,
       );
     } else {
