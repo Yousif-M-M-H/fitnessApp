@@ -4,6 +4,7 @@ import { AppError, asyncHandler } from "../../utils/error/error.js";
 import path from 'path';
 import fs from 'fs';
 import User from "../../models/user.js";
+import UserWorkout from "../../models/userWorkout.js";
 import { generateWorkoutPlan } from './workout.service.js';
 
 // Create workout plan
@@ -219,6 +220,24 @@ export const customizeWorkoutPlan = asyncHandler(async (req, res, next) => {
     gender,
     sessionDuration,
     goal: goal || 'fitness'
+  });
+
+  // Get user info
+  const user = await User.findById(req.user.id);
+
+  // Save the generated workout to database
+  await UserWorkout.create({
+    userId: req.user.id,
+    userName: `${user.firstName} ${user.lastName}`,
+    gymDaysPerWeek: workoutPlan.summary.gymDaysPerWeek,
+    fitnessLevel: workoutPlan.summary.fitnessLevel,
+    gender: workoutPlan.summary.gender,
+    sessionDuration: workoutPlan.summary.sessionDuration,
+    goal: workoutPlan.summary.goal,
+    workoutSplit: workoutPlan.summary.workoutSplit,
+    weeklyPlan: workoutPlan.weeklyPlan,
+    recommendations: workoutPlan.recommendations,
+    generalTips: workoutPlan.generalTips
   });
 
   // Save preferences to user's profile
