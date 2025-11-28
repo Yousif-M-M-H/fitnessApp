@@ -1,104 +1,125 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Admin credentials
+  const ADMIN_EMAIL = 'admin@fittrack.com';
+  const ADMIN_PASSWORD = 'FitTrack2024!Admin';
+
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
-    try {
-      const response = await authService.login({ email, password });
-
-      // Check if user is admin
-      if (response.user.role !== 'admin') {
-        setError('Access denied. Admin privileges required.');
-        authService.logout();
-        return;
-      }
-
-      // Redirect to dashboard
-      navigate('/');
-      window.location.reload(); // Reload to fetch dashboard data
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
-      setLoading(false);
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      localStorage.setItem('adminAuth', 'true');
+      window.location.href = '/';
+    } else {
+      setError('Invalid email or password');
     }
   };
 
   return (
     <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #0f1419 0%, #1a1f28 100%)'
     }}>
       <div style={{
-        background: '#0f3460',
-        padding: '40px',
+        background: '#1a1f28',
+        padding: '48px',
         borderRadius: '16px',
-        width: '400px',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+        width: '100%',
+        maxWidth: '420px',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
       }}>
-        <h1 style={{
-          color: '#fff',
-          marginBottom: '10px',
-          fontSize: '28px',
-          textAlign: 'center'
-        }}>
-          FitTrack Admin
-        </h1>
-        <p style={{
-          color: '#9ca3af',
-          marginBottom: '30px',
-          textAlign: 'center'
-        }}>
-          Sign in to access the dashboard
-        </p>
+        {/* Logo/Title */}
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '32px',
+            margin: '0 auto 16px'
+          }}>
+            💪
+          </div>
+          <h1 style={{
+            fontSize: '28px',
+            fontWeight: '700',
+            color: '#fff',
+            marginBottom: '8px'
+          }}>
+            Admin Dashboard
+          </h1>
+          <p style={{ color: '#9ca3af', fontSize: '14px' }}>
+            Sign in to manage your fitness app
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
+          {error && (
+            <div style={{
+              background: '#ef444415',
+              border: '1px solid #ef4444',
+              color: '#ef4444',
+              padding: '12px',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              fontSize: '14px',
+              textAlign: 'center'
+            }}>
+              {error}
+            </div>
+          )}
+
           <div style={{ marginBottom: '20px' }}>
             <label style={{
               display: 'block',
-              color: '#e4e4e7',
               marginBottom: '8px',
+              color: '#9ca3af',
               fontSize: '14px',
+              fontWeight: '500'
             }}>
-              Email
+              Email Address
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              placeholder="admin@fitness.com"
               style={{
                 width: '100%',
-                padding: '12px',
+                padding: '14px',
                 borderRadius: '8px',
-                border: '1px solid #374151',
-                background: '#1f2937',
+                border: '1px solid #2d3748',
+                background: '#0f1419',
                 color: '#fff',
-                fontSize: '14px',
+                fontSize: '15px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
               }}
-              placeholder="admin@example.com"
+              onFocus={(e) => e.target.style.borderColor = '#10b981'}
+              onBlur={(e) => e.target.style.borderColor = '#2d3748'}
+              required
             />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '28px' }}>
             <label style={{
               display: 'block',
-              color: '#e4e4e7',
               marginBottom: '8px',
+              color: '#9ca3af',
               fontSize: '14px',
+              fontWeight: '500'
             }}>
               Password
             </label>
@@ -106,49 +127,42 @@ function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              placeholder="Enter your password"
               style={{
                 width: '100%',
-                padding: '12px',
+                padding: '14px',
                 borderRadius: '8px',
-                border: '1px solid #374151',
-                background: '#1f2937',
+                border: '1px solid #2d3748',
+                background: '#0f1419',
                 color: '#fff',
-                fontSize: '14px',
+                fontSize: '15px',
+                outline: 'none',
+                transition: 'border-color 0.2s'
               }}
-              placeholder="••••••••"
+              onFocus={(e) => e.target.style.borderColor = '#10b981'}
+              onBlur={(e) => e.target.style.borderColor = '#2d3748'}
+              required
             />
           </div>
 
-          {error && (
-            <div style={{
-              background: '#dc2626',
-              color: '#fff',
-              padding: '12px',
-              borderRadius: '8px',
-              marginBottom: '20px',
-              fontSize: '14px',
-            }}>
-              {error}
-            </div>
-          )}
-
           <button
             type="submit"
-            disabled={loading}
             style={{
               width: '100%',
-              padding: '12px',
+              padding: '14px',
               borderRadius: '8px',
               border: 'none',
-              background: loading ? '#6b7280' : '#10b981',
-              color: '#fff',
+              background: '#10b981',
+              color: '#0a0e14',
               fontSize: '16px',
               fontWeight: '600',
-              cursor: loading ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#059669'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#10b981'}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            Sign In
           </button>
         </form>
       </div>

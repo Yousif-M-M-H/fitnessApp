@@ -1,4 +1,4 @@
-import { Search, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Trash2, Edit2, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface User {
@@ -15,6 +15,11 @@ function Users() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
+
+  // Edit modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '' });
 
   useEffect(() => {
     fetchUsers();
@@ -43,6 +48,52 @@ function Users() {
         }
       })
       .catch(err => console.error('Failed to fetch active users:', err));
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setEditForm({ firstName: user.firstName, lastName: user.lastName });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsEditModalOpen(false);
+    setEditingUser(null);
+    setEditForm({ firstName: '', lastName: '' });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingUser) return;
+
+    if (!editForm.firstName.trim() || !editForm.lastName.trim()) {
+      alert('First name and last name cannot be empty');
+      return;
+    }
+
+    fetch(`http://localhost:5000/api/v1/admin/users/${editingUser._id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(editForm),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // Update user in state
+          setAllUsers(prev => prev.map(user =>
+            user._id === editingUser._id ? { ...user, ...editForm } : user
+          ));
+          alert('User updated successfully');
+          handleCloseModal();
+        } else {
+          alert(data.message || 'Failed to update user');
+        }
+      })
+      .catch(err => {
+        console.error('Failed to update user:', err);
+        alert('Failed to update user');
+      });
   };
 
   const handleDelete = (userId: string, userName: string) => {
@@ -161,13 +212,24 @@ function Users() {
                 <td>{user.email}</td>
                 <td>{formatDate(user.createdAt)}</td>
                 <td>
-                  <button
-                    className="action-button"
-                    onClick={() => handleDelete(user._id, `${user.firstName} ${user.lastName}`)}
-                    title="Delete user"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="action-button"
+                      onClick={() => handleEdit(user)}
+                      title="Edit user"
+                      style={{ color: '#3b82f6' }}
+                    >
+                      <Edit2 size={20} />
+                    </button>
+                    <button
+                      className="action-button"
+                      onClick={() => handleDelete(user._id, `${user.firstName} ${user.lastName}`)}
+                      title="Delete user"
+                      style={{ color: '#ef4444' }}
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -216,6 +278,124 @@ function Users() {
           >
             <ChevronRight size={20} />
           </button>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#1a1f28',
+            borderRadius: '12px',
+            padding: '32px',
+            width: '90%',
+            maxWidth: '500px',
+            position: 'relative'
+          }}>
+            <button
+              onClick={handleCloseModal}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                color: '#9ca3af',
+                cursor: 'pointer',
+                padding: '4px'
+              }}
+            >
+              <X size={24} />
+            </button>
+
+            <h2 style={{ marginBottom: '24px', color: '#fff', fontSize: '24px' }}>
+              Edit User
+            </h2>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: '#9ca3af', fontSize: '14px' }}>
+                First Name
+              </label>
+              <input
+                type="text"
+                value={editForm.firstName}
+                onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid #2d3748',
+                  background: '#0f1419',
+                  color: '#fff',
+                  fontSize: '16px'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '32px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: '#9ca3af', fontSize: '14px' }}>
+                Last Name
+              </label>
+              <input
+                type="text"
+                value={editForm.lastName}
+                onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid #2d3748',
+                  background: '#0f1419',
+                  color: '#fff',
+                  fontSize: '16px'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  border: '1px solid #2d3748',
+                  background: 'transparent',
+                  color: '#9ca3af',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#10b981',
+                  color: '#0a0e14',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

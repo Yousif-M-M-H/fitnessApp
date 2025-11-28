@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getDashboardStats, getDailyActiveUsers, getWeeklyCompletion, getAllUsers, deleteUser, getAllWorkouts } from "./admin.controller.js";
+import { getDashboardStats, getDailyActiveUsers, getWeeklyCompletion, getAllUsers, updateUser, deleteUser, getAllWorkouts } from "./admin.controller.js";
 
 const router = Router();
 
@@ -8,6 +8,7 @@ router.get("/dashboard/stats", getDashboardStats);
 router.get("/dashboard/daily-users", getDailyActiveUsers);
 router.get("/dashboard/weekly-completion", getWeeklyCompletion);
 router.get("/users", getAllUsers);
+router.put("/users/:id", updateUser);
 router.delete("/users/:id", deleteUser);
 router.get("/workouts", getAllWorkouts);
 

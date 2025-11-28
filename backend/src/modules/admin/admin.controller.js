@@ -161,6 +161,46 @@ export const getAllUsers = asyncHandler(async (req, res) => {
   });
 });
 
+// Update a user
+export const updateUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { firstName, lastName } = req.body;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'User not found'
+    });
+  }
+
+  if (user.role === 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Cannot edit admin users'
+    });
+  }
+
+  // Update user fields
+  if (firstName) user.firstName = firstName;
+  if (lastName) user.lastName = lastName;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'User updated successfully',
+    data: {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      createdAt: user.createdAt
+    }
+  });
+});
+
 // Delete a user
 export const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;

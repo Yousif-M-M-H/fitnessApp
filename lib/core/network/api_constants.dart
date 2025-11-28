@@ -2,29 +2,25 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class ApiConstants {
-  // IMPORTANT: Set your computer's local IP address here
-  // To find your IP:
-  // - macOS/Linux: Run 'ifconfig' or 'ipconfig getifaddr en0' in terminal
-  // - Windows: Run 'ipconfig' in command prompt
-  // Look for IPv4 address (e.g., 192.168.1.100, 10.0.0.5, etc.)
-  static const String _localIpAddress = '192.168.0.167'; // Your computer's IP address
-
   static const String _port = '5000';
   static const String _apiVersion = 'api/v1';
 
   /// Automatically determines the correct base URL based on the platform
   static String get baseUrl {
-    // FOR PHYSICAL DEVICE: Always use your computer's IP address
-    // FOR EMULATOR: Use the emulator-specific address
+    // IMPORTANT FOR DEPLOYMENT:
+    // - Android Emulator: Use 10.0.2.2
+    // - Physical Device: Use your computer's IP (e.g., 192.168.0.167)
+    // - iOS Simulator: Use localhost
 
     if (kIsWeb) {
       return 'http://localhost:$_port/$_apiVersion';
     } else if (Platform.isAndroid) {
-      // Check if running on emulator by trying to detect emulator characteristics
-      // Physical devices should ALWAYS use the local IP address
-      return 'http://$_localIpAddress:$_port/$_apiVersion';
+      // Android Emulator uses 10.0.2.2 to access host machine's localhost
+      // FOR PHYSICAL DEVICE: Change to 'http://YOUR_IP_HERE:$_port/$_apiVersion'
+      return 'http://10.0.2.2:$_port/$_apiVersion';
     } else if (Platform.isIOS) {
-      return 'http://$_localIpAddress:$_port/$_apiVersion';
+      // iOS Simulator can use localhost
+      return 'http://localhost:$_port/$_apiVersion';
     } else {
       return 'http://localhost:$_port/$_apiVersion';
     }

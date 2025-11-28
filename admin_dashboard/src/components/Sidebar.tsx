@@ -1,14 +1,23 @@
-import { Users, Dumbbell, Settings, MessageSquare, HelpCircle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Users, Dumbbell, Settings, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navItems = [
     { path: '/', icon: Users, label: 'Users' },
     { path: '/workouts', icon: Dumbbell, label: 'Workouts' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('adminAuth');
+      navigate('/login');
+      window.location.reload();
+    }
+  };
 
   return (
     <aside className="sidebar">
@@ -32,14 +41,22 @@ function Sidebar() {
         })}
       </nav>
       <div className="sidebar-footer">
-        <div className="nav-item">
-          <MessageSquare size={20} />
-          <span>Feedback</span>
-        </div>
-        <div className="nav-item">
-          <HelpCircle size={20} />
-          <span>Help</span>
-        </div>
+        <button
+          onClick={handleLogout}
+          className="nav-item"
+          style={{
+            width: '100%',
+            border: 'none',
+            background: 'none',
+            cursor: 'pointer',
+            color: '#ef4444',
+            padding: '12px 16px',
+            textAlign: 'left'
+          }}
+        >
+          <LogOut size={20} />
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
   );
